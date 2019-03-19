@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "gsap": "^2.0.1"
+    "three": "^0.102.1",
+    "three-trackballcontrols": "0.0.7"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
