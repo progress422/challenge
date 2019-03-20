@@ -68,17 +68,18 @@ scene.add( light );
 // Utilities
 /////////////////////////////////////////
 
-var axesHelper = new THREE.AxesHelper( 1.25 );
-scene.add( axesHelper );
+var axisHelper = new THREE.AxisHelper( 1.25 );
+scene.add( axisHelper );
 
 /////////////////////////////////////////
 // Objects add to scene
 /////////////////////////////////////////
 
-createBox(5,0.01,50,'grey', [0,0,-25], 0);
-createBox(1,1,1,'green', [2,0,-5]);
-createBox(1,1,1,'green', [-2,0,-9]);
-let player = createBox(1,1,1,'red',[0,0.5,0]);
+createBox(5,0.01,50,'grey', [0,0,-24], 0);
+createBox(1,1,1,'green', [2,0,-5], 22);
+createBox(1,1,1,'green', [-2,0,-9], 10);
+createBox(1,1,1,'green', [0,0,-9]);
+let player = createBox(1,1,1,'red',[0,0.6,0]);
 let playerZ = 0;
 player.velocityX = 0;
 
@@ -101,23 +102,29 @@ render()
 var simulate = false;
 setTimeout(() => {
   simulate = true;
-}, 3000);
+}, 1000);
 function animationLoop() {
-  if (simulate){
-    // camera.lookAt(player.position);
     scene.simulate();
-  }
   requestAnimationFrame(animationLoop);
   // controls.update();
   playerZ -= 0.05;
   // playerX += player.velocityX;
   player.position.setZ(playerZ);
+  player.__dirtyPosition = true;
+  // player.setLinearVelocity(new THREE.Vector3(0, 0, 0));
+  // player.setAngularVelocity(new THREE.Vector3(0, 0, 0));
   // player.position.setX(playerX);
   camera.position.setZ(playerZ+25);
   render()
 }
 
 animationLoop();
+
+player.addEventListener( 'collision', function( other_object, relative_velocity, relative_rotation, contact_normal ) {
+  console.log('collision');
+  
+  // `this` has collided with `other_object` with an impact speed of `relative_velocity` and a rotational force of `relative_rotation` and at normal `contact_normal`
+});
 
 
 /////////////////////////////////////////
@@ -141,3 +148,6 @@ function createBox(width, height, depth, color, position = [0,0,0], mass){
   scene.add( cube );
   return cube;
 }
+
+
+// https://stackoverflow.com/questions/23095082/physijs-combining-movement-and-physics
