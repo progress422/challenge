@@ -1,18 +1,20 @@
 const TrackballControls = require('three-trackballcontrols');
+Physijs.scripts.worker = '/js/physijs_worker.js';
+Physijs.scripts.ammo = '/js/ammo.js';
 
 /////////////////////////////////////////
 // Scene Setup
 /////////////////////////////////////////
 
-let scene,
+var scene,
     camera,
     renderer,
     controls;
 
-scene = new THREE.Scene();
+scene = new Physijs.Scene;
 
 camera = new THREE.PerspectiveCamera( 10, window.innerWidth / window.innerHeight, 1, 1000 );
-camera.position.set(-5, 12, 10);
+camera.position.set(0, 6, 25);
 camera.lookAt( scene.position );
 
 renderer = new THREE.WebGLRenderer({
@@ -22,6 +24,13 @@ renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize( window.innerWidth, window.innerHeight );
 
 document.body.appendChild( renderer.domElement );
+
+window.setCamera = function(x,y,z) {
+  camera.position.set(x,y,z)
+}
+window.lookCamera = function(x,y,z) {
+  camera.lookAt(x,y,z)
+}
 
 
 /////////////////////////////////////////
@@ -66,9 +75,12 @@ scene.add( axesHelper );
 // Objects add to scene
 /////////////////////////////////////////
 
-createBox(5,0.01,20,'grey', [0,0,0]);
+createBox(5,0.01,50,'grey', [0,0,-25], 0);
+createBox(1,1,1,'green', [2,0,-5]);
+createBox(1,1,1,'green', [-2,0,-9]);
 let player = createBox(1,1,1,'red',[0,0.5,0]);
 let playerZ = 0;
+player.velocityX = 0;
 
 /////////////////////////////////////////
 // Render Loop
@@ -86,11 +98,22 @@ render()
 
 // Avoid constantly rendering the scene by only 
 // updating the controls every requestAnimationFrame
+var simulate = false;
+setTimeout(() => {
+  simulate = true;
+}, 3000);
 function animationLoop() {
+  if (simulate){
+    // camera.lookAt(player.position);
+    scene.simulate();
+  }
   requestAnimationFrame(animationLoop);
-  controls.update();
-  playerZ -= 0.01;
+  // controls.update();
+  playerZ -= 0.05;
+  // playerX += player.velocityX;
   player.position.setZ(playerZ);
+  // player.position.setX(playerX);
+  camera.position.setZ(playerZ+25);
   render()
 }
 
@@ -110,10 +133,10 @@ window.addEventListener( 'resize', function () {
 }, false );
 
 
-function createBox(width, height, depth, color, position = [0,0,0]){
+function createBox(width, height, depth, color, position = [0,0,0], mass){
   const geometry = new THREE.BoxGeometry( width, height, depth );
   const material = new THREE.MeshPhysicalMaterial( {color} );
-  const cube = new THREE.Mesh( geometry, material );
+  const cube = new Physijs.BoxMesh( geometry, material, mass );
   cube.position.set(position[0],position[1],position[2]);
   scene.add( cube );
   return cube;
