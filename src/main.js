@@ -32,6 +32,14 @@ window.lookCamera = function(x,y,z) {
   camera.lookAt(x,y,z)
 }
 
+// keys
+
+let left = 0,
+    right = 0,
+    jump = 0,
+    forward = 0,
+    backward = 0;
+
 
 /////////////////////////////////////////
 // Trackball Controller
@@ -79,7 +87,7 @@ createBox(5,0.01,50,'grey', [0,0,-24], 0);
 createBox(1,1,1,'green', [2,0,-5], 22);
 createBox(1,1,1,'green', [-2,0,-9], 10);
 createBox(1,1,1,'green', [0,0,-9]);
-let player = createBox(1,1,1,'red',[0,0,0]);
+let player = createBox(1,1,1,'red',[0,0.6,0],1);
 let playerZ = 0;
 player.velocityX = 0;
 
@@ -105,26 +113,11 @@ setTimeout(() => {
 }, 3000);
 function animationLoop() {
   scene.simulate();
-  // controls.update();
-  // if (simulate)
-  playerZ -= 0.01;
-  // playerX += player.velocityX;
-  // player.position.setZ(playerZ);
-  // console.log(player.getLinearVelocity());
-  let oldVector = player.getLinearVelocity();
-  let playerVec3 = new THREE.Vector3(-1,oldVector.y,oldVector.z);
-  // console.log(playerVec3);
-  
-  player.setLinearVelocity(playerVec3);
-  
-  // player.__dirtyPosition = true;
-  // player.setLinearVelocity(new THREE.Vector3(0, 0, 0));
-  // player.setAngularVelocity(new THREE.Vector3(0, 0, 0));
-  // player.position.setX(playerX);
-  // camera.position.setZ(playerZ+25);
-  if (simulate)
-    camera.position.setX(playerZ);
+  playerMove();
   render()
+   camera.position.setZ(player.position.z + 25);
+   camera.position.setX(player.position.x);
+   camera.position.setY(player.position.y + 7);
   requestAnimationFrame(animationLoop);
 }
 
@@ -160,9 +153,10 @@ function createBox(width, height, depth, color, position = [0,0,0], mass){
 }
 
 // keys
-let left, right, jump, forward, backward;
 window.addEventListener('keydown', function (event) {
   event.preventDefault(event);
+  console.log(event.keyCode);
+  
   switch (event.keyCode) {
     case 38: forward = 1; break;// up key
     case 40: backward = 1; break;// down key
@@ -181,6 +175,21 @@ window.addEventListener('keyup', function (event) {
     case 37: left = 0; break; // left key
   }
 });
+
+function playerMove() {
+  const speedX = 2;
+  const speedZ = 2;
+  const jumpSpeed = 0.3;
+  let oldVector = player.getLinearVelocity();
+  console.log(oldVector);
+  
+  // let playerVec3 = new THREE.Vector3(-1,oldVector.y,oldVector.z);
+  let playerVec3 = new THREE.Vector3(speedX*(right-left),oldVector.y + jumpSpeed*jump,speedZ*(backward-forward));
+  // console.log(oldVector.x + speedX*(right-left),-10,oldVector.z + speedZ*(backward-forward));
+  // console.log(oldVector.x + speedX*(right-left),oldVector.y,oldVector.z + speedZ*(backward-forward));
+  
+  player.setLinearVelocity(playerVec3);
+}
 
 
 // https://stackoverflow.com/questions/23095082/physijs-combining-movement-and-physics
