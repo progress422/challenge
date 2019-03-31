@@ -79,7 +79,7 @@ createBox(5,0.01,50,'grey', [0,0,-24], 0);
 createBox(1,1,1,'green', [2,0,-5], 22);
 createBox(1,1,1,'green', [-2,0,-9], 10);
 createBox(1,1,1,'green', [0,0,-9]);
-let player = createBox(1,1,1,'red',[0,0.6,0]);
+let player = createBox(1,1,1,'red',[0,0,0]);
 let playerZ = 0;
 player.velocityX = 0;
 
@@ -99,23 +99,33 @@ render()
 
 // Avoid constantly rendering the scene by only 
 // updating the controls every requestAnimationFrame
-var simulate = false;
+var simulate = true;
 setTimeout(() => {
-  simulate = true;
-}, 1000);
+  simulate = false;
+}, 3000);
 function animationLoop() {
-    scene.simulate();
-  requestAnimationFrame(animationLoop);
+  scene.simulate();
   // controls.update();
-  playerZ -= 0.05;
+  // if (simulate)
+  playerZ -= 0.01;
   // playerX += player.velocityX;
-  player.position.setZ(playerZ);
-  player.__dirtyPosition = true;
+  // player.position.setZ(playerZ);
+  // console.log(player.getLinearVelocity());
+  let oldVector = player.getLinearVelocity();
+  let playerVec3 = new THREE.Vector3(-1,oldVector.y,oldVector.z);
+  // console.log(playerVec3);
+  
+  player.setLinearVelocity(playerVec3);
+  
+  // player.__dirtyPosition = true;
   // player.setLinearVelocity(new THREE.Vector3(0, 0, 0));
   // player.setAngularVelocity(new THREE.Vector3(0, 0, 0));
   // player.position.setX(playerX);
-  camera.position.setZ(playerZ+25);
+  // camera.position.setZ(playerZ+25);
+  if (simulate)
+    camera.position.setX(playerZ);
   render()
+  requestAnimationFrame(animationLoop);
 }
 
 animationLoop();
@@ -148,6 +158,29 @@ function createBox(width, height, depth, color, position = [0,0,0], mass){
   scene.add( cube );
   return cube;
 }
+
+// keys
+let left, right, jump, forward, backward;
+window.addEventListener('keydown', function (event) {
+  event.preventDefault(event);
+  switch (event.keyCode) {
+    case 38: forward = 1; break;// up key
+    case 40: backward = 1; break;// down key
+    case 32: jump = 1; break; // space key
+    case 39: right = 1; break; // right key
+    case 37: left = 1; break; // left key
+  }
+});
+window.addEventListener('keyup', function (event) {
+  event.preventDefault(event);
+  switch (event.keyCode) {
+    case 38: forward = 0; break;// up key
+    case 40: backward = 0; break;// down key
+    case 32: jump = 0; break; // space key
+    case 39: right = 0; break; // right key
+    case 37: left = 0; break; // left key
+  }
+});
 
 
 // https://stackoverflow.com/questions/23095082/physijs-combining-movement-and-physics
